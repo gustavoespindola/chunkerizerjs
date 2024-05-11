@@ -26,7 +26,7 @@ export default function Home() {
         })
       }).then(async (resp) => {
         const c = await resp.json()
-        chunkerizerStore.setChunks(c.textSplits)
+        chunkerizerStore.setChunks(c.data)
         chunkerizerStore.setIsLoading(false)
         console.log(chunkerizerStore.chunks)
       })

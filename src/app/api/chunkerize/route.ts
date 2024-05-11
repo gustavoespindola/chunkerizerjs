@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SentenceSplitter } from "@llamaindex/edge";
+import { SentenceSplitter, globalsHelper } from "@llamaindex/edge";
 
 interface RequestBody {
 	text?: string;
@@ -9,9 +9,6 @@ interface RequestBody {
 	chunkingTokenizerFn?: (text: string) => string[];
 	paragraphSeparator?: string;
 }
-
-// export const runtime = "edge";
-// export const runtime = "node";
 
 export async function POST(req: NextRequest) {
 	const body = (await req.json()) as RequestBody;
@@ -46,5 +43,10 @@ export async function POST(req: NextRequest) {
 
 	const textSplits = splitter.splitText(text) as string[];
 
-	return NextResponse.json({ textSplits }, { status: 200 });
+	const data = textSplits.map((split) => {
+		const tokens = globalsHelper.tokenizer()(split);
+		return { text: split, tokens: tokens.length };
+	});
+
+	return NextResponse.json({ data }, { status: 200 });
 }

@@ -5,9 +5,6 @@ interface RequestBody {
 	text?: string;
 }
 
-// export const runtime = "edge";
-// export const runtime = "node";
-
 export async function POST(req: NextRequest) {
 	const body = (await req.json()) as RequestBody;
 

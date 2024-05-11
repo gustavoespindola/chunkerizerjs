@@ -29,47 +29,56 @@ export default function Chunkerizer({
 
   const chunkerizerStore = useChunkerizerStore();
 
-  const highlightOverlap = (chunks: string[]) => {
+  const highlightOverlap = (chunks: { text: string; tokens: number }[]) => {
     // Convert each chunk into an array of words
-    if (!chunks) return;
+    const items = chunks.map((chunk) => { return { text: chunk.text, tokens: chunk.tokens } });
+
+    if (!items) return;
 
     if (!chunkerizerStore.overlap) {
-      return chunks.map((chunk, i) => {
+      // show tokens and chunks
+      return items.map(({ text, tokens }, i) => {
         return (
-          <li key={i}>
-            <p>{chunk}</p>
+          <li key={i} className="gap-2">
+            <p className="text-xs text-default-500 font-sans mb-2">Tokens {tokens}</p>
+            <p className='font-[300]'>{text}</p>
           </li>
         )
-      });
+      })
     }
 
-    const list = chunks.map((chunk) => chunk.split(' '));
+    const list = items.map(({ text, tokens }, i) => {
+      return {
+        text: text.split(' '),
+        tokens
+      }
+    });
 
-    const overlapList = list.map((chunk, i) => {
+    const overlapList = list.map(({ text, tokens }, i) => {
 
-      const nextChunk = list[i + 1];
+      const nextChunk = list[i + 1] ? list[i + 1].text : null;
 
       // If there's no next chunk, return the current chunk without overlap
-      if (!nextChunk) return { chunk: { text: chunk.join(' '), tokens: 0 }, overlap: { text: '', tokens: 0 } };
+      if (!nextChunk) return { chunk: { text: text.join(' '), tokens }, overlap: { text: '', tokens: 0 } };
 
       // Find the first 5 words of the next chunk
       const nextChunkStartWords = nextChunk.slice(0, 5);
 
       // Find the index in the current chunk where the first few words of the next chunk start appearing
-      const overlapStartIndex = chunk.findIndex((word, j) => {
+      const overlapStartIndex = text.findIndex((word, j) => {
         return nextChunkStartWords.includes(word);
       });
 
       // If no overlap is found, return the current chunk without overlap
       if (overlapStartIndex === -1) {
-        return { chunk: { text: chunk.join(' '), tokens: 0 }, overlap: { text: '', tokens: 0 } };
+        return { chunk: { text: text.join(' '), tokens: 0 }, overlap: { text: '', tokens: 0 } };
       }
 
       // The overlap is the substring of the current chunk starting from the overlap start index
-      const overlap = chunk.slice(overlapStartIndex).join(' ');
+      const overlap = text.slice(overlapStartIndex).join(' ');
 
       const result: OverlapResult = {
-        chunk: { text: chunk.join(' '), tokens: 0 },
+        chunk: { text: text.join(' '), tokens },
         overlap: { text: overlap, tokens: 0 },
       };
       return result;
@@ -85,6 +94,7 @@ export default function Chunkerizer({
     const render = listWithPrevOverlap.map(({ chunk, overlap, prevOverlap }, i) => {
       return (
         <li key={i}>
+          <p className="text-xs text-default-500 font-sans mb-2">Tokens {chunk.tokens}</p>
           <p className='relative'>
             {prevOverlap &&
               <span className='border-l-4 pl-2 border-fuchsia-500 font-[300] bg-fuchsia-500/20 text-fuchsia-950 break-normal'>
@@ -146,7 +156,9 @@ export default function Chunkerizer({
                 chunkerizerStore.isLoading ? (
                   <Skeleton className="w-2.5 h-2.5 bg-gray-300 rounded-xl" />
                 ) : (
-                  <span>{chunkerizerStore.chunks.length}</span>
+                  <span>{
+                    chunkerizerStore.chunks.length
+                  }</span>
                 )
               }
               <span>Chunks</span>
