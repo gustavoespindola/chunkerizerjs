@@ -1,4 +1,6 @@
-# 🦜️✂️ Langchain Text Splitter
+# 🦙✂️ Text Splitters: Smart Text Division with Llamaindex
+##### Precision Text Splitting Made Easy with LlamaIndex
+
 This is a javascript application that allows you to split and analyze text files using Sentence Splitter.
 
 #### [Project Demo in Vercel](https://chunkerizer.vercel.app)
